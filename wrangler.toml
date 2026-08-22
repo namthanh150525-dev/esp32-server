@@ -6,8 +6,3 @@ compatibility_date = "2024-01-01"
 [[r2_buckets]]
 binding = "GAME_ASSETS"
 bucket_name = "esp32-game-assets"
-
-# KV namespace cho config nhanh
-[[kv_namespaces]]
-binding = "DEVICE_CONFIG"
-id = "REPLACE_WITH_YOUR_KV_ID"

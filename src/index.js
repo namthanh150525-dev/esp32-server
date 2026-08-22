@@ -245,8 +245,9 @@ export default {
     if (configGetMatch && method === 'GET') {
       const deviceId = configGetMatch[1];
       try {
-        const config = await env.DEVICE_CONFIG.get(deviceId);
-        if (!config) {
+        // Lưu config trong R2 bucket (configs/ folder)
+        const object = await env.GAME_ASSETS.get(`configs/${deviceId}.json`);
+        if (!object) {
           return jsonResponse({
             success: true,
             device_id: deviceId,
@@ -254,10 +255,11 @@ export default {
             message: 'No config found, using defaults'
           });
         }
+        const text = await object.text();
         return jsonResponse({
           success: true,
           device_id: deviceId,
-          config: JSON.parse(config)
+          config: JSON.parse(text)
         });
       } catch (e) {
         return errorResponse('Failed to get config: ' + e.message, 500);
@@ -275,11 +277,11 @@ export default {
           device_id: deviceId,
           updated_at: new Date().toISOString()
         };
-        // Lưu vào KV, TTL 30 ngày
-        await env.DEVICE_CONFIG.put(
-          deviceId,
+        // Lưu vào R2 bucket (configs/ folder)
+        await env.GAME_ASSETS.put(
+          `configs/${deviceId}.json`,
           JSON.stringify(configData),
-          { expirationTtl: 60 * 60 * 24 * 30 }
+          { httpMetadata: { contentType: 'application/json' } }
         );
         return jsonResponse({
           success: true,
