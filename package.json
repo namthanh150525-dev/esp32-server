@@ -1,0 +1,13 @@
+{
+  "name": "esp32-api",
+  "version": "1.0.0",
+  "description": "ESP32 Game Console - Cloudflare Worker API",
+  "main": "src/index.js",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev"
+  },
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}
