@@ -238,6 +238,15 @@ function drawMenu() {
     const rows = Math.ceil(MENU_ITEMS.length / cols);
     const maxScroll = Math.max(0, (rows - 2) * 85);
 
+    // Cập nhật Scroll theo vị trí con trỏ
+    const cursorRow = Math.floor(menuCursor / cols);
+    const cursorY = cursorRow * 85;
+    if (cursorY < menuScrollYTarget) {
+        menuScrollYTarget = cursorY;
+    } else if (cursorY > menuScrollYTarget + 85) {
+        menuScrollYTarget = cursorY - 85;
+    }
+
     // Mượt mà hóa (lerp) menu scroll
     menuScrollYTarget = Math.max(0, Math.min(maxScroll, menuScrollYTarget));
     menuScrollY += (menuScrollYTarget - menuScrollY) * 0.18;
@@ -827,6 +836,8 @@ function loop() {
         else drawLockscreen(); 
     }
     else if (currentApp === 'menu') {
+        if (Math.abs(menuScrollY - menuScrollYTarget) > 0.5) drawMenu();
+
         // Cập nhật phím di chuyển cho menu 4 cột
         const cols = 4;
         if (jPressed(btnLeft, prevBtnLeft)) { menuCursor = (menuCursor - 1 + MENU_ITEMS.length) % MENU_ITEMS.length; drawMenu(); tone(440,20); }
