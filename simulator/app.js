@@ -1,4 +1,4 @@
-// ============================================================
+﻿// ============================================================
 // ESP32 Console Simulator - Full App Logic
 // Tính năng: Lockscreen, Control Center, WiFi Setup, Cloud Music, 4 Games, Dev Config
 // ============================================================
@@ -18,7 +18,7 @@ let sysVolume = 50;
 let isWifiConnected = false;
 
 let prevBtnA = false, prevBtnStart = false, prevBtnB = false, prevBtnUp = false, prevBtnDown = false, prevBtnLeft = false, prevBtnRight = false, prevBtnHome = false, prevBtnPower = false;
-let prevBtnUp = false, prevBtnDown = false, prevBtnLeft = false, prevBtnRight = false, prevBtnSelect = false;
+let prevBtnSelect = false;
 
 // ── Audio (Mô phỏng tone ESP32) ───────────────────────────────
 let audioCtx = null;
