@@ -1,4 +1,4 @@
-// ============================================================
+﻿// ============================================================
 // ESP32 Console Simulator - Full App Logic
 // Tính năng: Lockscreen, Control Center, WiFi Setup, Cloud Music, 4 Games, Dev Config
 // ============================================================
@@ -580,12 +580,263 @@ function drawDevConfig() {
     drawStatusBar();
 }
 
-// ── GAMES & SETTINGS (Mô phỏng tĩnh để tiết kiệm code) ──────
-function launchSnake() { currentApp = 'snake'; tft.fillScreen(0x0841); tft.setTextColor(0xFFFF); tft.setTextFont(2); tft.setCursor(20, 150); tft.print("Snake Game Running..."); drawStatusBar(); }
-function launchDino() { currentApp = 'dino'; tft.fillScreen(0x0010); tft.setTextColor(0xFFFF); tft.setTextFont(2); tft.setCursor(20, 150); tft.print("Dino Game Running..."); drawStatusBar(); }
-function launchFlappy() { currentApp = 'flappy'; tft.fillScreen(0x0410); tft.setTextColor(0xFFFF); tft.setTextFont(2); tft.setCursor(20, 150); tft.print("Flappy Bird Running..."); drawStatusBar(); }
-function launchSpace() { currentApp = 'space'; tft.fillScreen(0x0000); tft.setTextColor(0xFFFF); tft.setTextFont(2); tft.setCursor(20, 150); tft.print("Space Shooter Running..."); drawStatusBar(); }
-function launchSettings() { currentApp = 'settings'; tft.fillScreen(0x0000); tft.setTextColor(0xFFFF); tft.setTextFont(2); tft.setCursor(20, 150); tft.print("Settings UI..."); drawStatusBar(); }
+// ----------------------------------------------------
+// SNAKE GAME IMPLEMENTATION
+// ----------------------------------------------------
+let snake = [];
+let snakeLen = 3, snakeDir = 3, snakeNextDir = 3;
+let snakeFood = {x:0, y:0};
+let snakeScore = 0, snakeHighScore = 0;
+let snakeGameOver = false, snakeNeedRedraw = true;
+let snakeLastMove = 0, snakeMoveDelay = 200;
+const SNAKE_COLS = 32, SNAKE_ROWS = 22, CELL_SIZE = 10;
+
+function spawnSnakeFood() {
+    let valid;
+    do {
+        valid = true;
+        snakeFood.x = Math.floor(Math.random() * SNAKE_COLS);
+        snakeFood.y = Math.floor(Math.random() * SNAKE_ROWS);
+        for (let i=0; i<snakeLen; i++) {
+            if (snake[i].x === snakeFood.x && snake[i].y === snakeFood.y) { valid = false; break; }
+        }
+    } while (!valid);
+}
+
+function launchSnake() { 
+    currentApp = 'snake'; 
+    snakeLen = 3; snakeDir = 3; snakeNextDir = 3; snakeScore = 0; snakeMoveDelay = 200; snakeGameOver = false; snakeNeedRedraw = true;
+    snake = [{x:10, y:12}, {x:9, y:12}, {x:8, y:12}];
+    for(let i=3; i<SNAKE_COLS*SNAKE_ROWS; i++) snake.push({x:0, y:0});
+    spawnSnakeFood();
+    tft.fillScreen(0x0000);
+    drawSnakeGrid(); drawSnakeHUD();
+}
+
+function drawSnakeGrid() {
+    for (let x=0; x<=SNAKE_COLS; x++) tft.drawFastVLine(x*CELL_SIZE, 20, SNAKE_ROWS*CELL_SIZE, 0x0841);
+    for (let y=0; y<=SNAKE_ROWS; y++) tft.drawFastHLine(0, y*CELL_SIZE+20, SCREEN_W, 0x0841);
+}
+
+function drawSnakeCell(x, y, color) {
+    tft.fillRect(x*CELL_SIZE + 1, y*CELL_SIZE + 20 + 1, CELL_SIZE - 2, CELL_SIZE - 2, color);
+}
+
+function drawSnakeHUD() {
+    tft.fillRect(0, 0, SCREEN_W, 20, 0x0841);
+    tft.setTextColor(0x07FF); tft.setTextFont(4); tft.setCursor(5, 8); tft.print("SNAKE");
+    tft.setTextFont(2); tft.setTextColor(0xFFFF); tft.setCursor(90, 5); tft.print("SCORE: " + snakeScore);
+    tft.setCursor(90, 22); tft.print("BEST:  " + snakeHighScore);
+    let speed = Math.floor((200 - snakeMoveDelay) / 12) + 1;
+    tft.setTextColor(0xFFE0); tft.setCursor(200, 14); tft.print("LV" + speed);
+    tft.drawFastHLine(0, 20 - 1, SCREEN_W, 0x07FF);
+}
+
+function drawSnakeGameOver() {
+    tft.fillRoundRect(20, 100, 200, 120, 10, 0x0841);
+    tft.drawRoundRect(20, 100, 200, 120, 10, 0xF800);
+    tft.setTextColor(0xF800); tft.setTextFont(4); tft.setCursor(45, 115); tft.print("GAME OVER");
+    tft.setTextColor(0xFFFF); tft.setTextFont(2); tft.setCursor(60, 150); tft.print("Score: " + snakeScore);
+    tft.setCursor(60, 168); tft.print("Best:  " + snakeHighScore);
+    tft.setTextColor(0x07FF); tft.setCursor(35, 195); tft.print("[A] Play Again");
+    tft.setCursor(55, 210); tft.print("[B] Menu");
+}
+
+function runSnakeFrame() {
+    let btnA = hw.buttons.A, btnB = hw.buttons.B, btnStart = hw.buttons.START, btnSelect = hw.buttons.SELECT;
+    let up = hw.buttons.UP || hw.joystick.y < 1748, down = hw.buttons.DOWN || hw.joystick.y > 2348;
+    let left = hw.buttons.LEFT || hw.joystick.x < 1748, right = hw.buttons.RIGHT || hw.joystick.x > 2348;
+    
+    if (snakeGameOver) {
+        if ((btnA && !prevBtnA) || (btnStart && !prevBtnStart)) launchSnake();
+        if (btnB && !prevBtnB) launchMenu();
+        return;
+    }
+    if ((btnSelect && !prevBtnSelect) || (btnB && !prevBtnB)) { launchMenu(); return; }
+    
+    if (up && snakeDir !== 1) snakeNextDir = 0;
+    if (down && snakeDir !== 0) snakeNextDir = 1;
+    if (left && snakeDir !== 3) snakeNextDir = 2;
+    if (right && snakeDir !== 2) snakeNextDir = 3;
+    
+    let now = millis();
+    if (now - snakeLastMove < snakeMoveDelay) {
+        if (snakeNeedRedraw) {
+            snakeNeedRedraw = false;
+            tft.fillRect(0, 20, SCREEN_W, SCREEN_H - 20, 0x0000);
+            drawSnakeGrid();
+            for (let i=1; i<snakeLen; i++) drawSnakeCell(snake[i].x, snake[i].y, 0x07E0);
+            drawSnakeCell(snake[0].x, snake[0].y, 0x07FF);
+            drawSnakeCell(snakeFood.x, snakeFood.y, 0xF800);
+            drawSnakeHUD();
+        }
+        return;
+    }
+    snakeLastMove = now;
+    snakeDir = snakeNextDir;
+    
+    let newHead = {x: snake[0].x, y: snake[0].y};
+    if (snakeDir === 0) newHead.y--; else if (snakeDir === 1) newHead.y++; else if (snakeDir === 2) newHead.x--; else if (snakeDir === 3) newHead.x++;
+    
+    if (newHead.x < 0 || newHead.x >= SNAKE_COLS || newHead.y < 0 || newHead.y >= SNAKE_ROWS) {
+        snakeGameOver = true; if (snakeScore > snakeHighScore) snakeHighScore = snakeScore; tone(100, 500); drawSnakeGameOver(); return;
+    }
+    for (let i=1; i<snakeLen; i++) {
+        if (snake[i].x === newHead.x && snake[i].y === newHead.y) {
+            snakeGameOver = true; if (snakeScore > snakeHighScore) snakeHighScore = snakeScore; tone(100, 500); drawSnakeGameOver(); return;
+        }
+    }
+    
+    let ate = (newHead.x === snakeFood.x && newHead.y === snakeFood.y);
+    if (!ate) {
+        let tail = snake[snakeLen - 1]; drawSnakeCell(tail.x, tail.y, 0x0000);
+        for (let i=snakeLen-1; i>0; i--) snake[i] = {x: snake[i-1].x, y: snake[i-1].y};
+    } else {
+        for (let i=snakeLen; i>0; i--) snake[i] = {x: snake[i-1].x, y: snake[i-1].y};
+        snakeLen++; snakeScore+=10; if (snakeMoveDelay > 80) snakeMoveDelay-=5;
+        spawnSnakeFood(); drawSnakeCell(snakeFood.x, snakeFood.y, 0xF800); tone(880, 50); drawSnakeHUD();
+    }
+    snake[0] = newHead;
+    drawSnakeCell(newHead.x, newHead.y, 0x07FF);
+    if (snakeLen > 1) drawSnakeCell(snake[1].x, snake[1].y, 0x07E0);
+}
+
+// ----------------------------------------------------
+// DINO GAME IMPLEMENTATION
+// ----------------------------------------------------
+let dinoY = 0, dinoVelY = 0, dinoSpeed = 3.0;
+let dinoOnGround = true, dinoJumping = false, dinoGameOver = false, dinoLegToggle = false;
+let dinoScore = 0, dinoHighScore = 0;
+let dinoLastScore = 0, dinoNextSpawn = 0, dinoLastAnim = 0;
+let dinoObs = [{x: 280, h: 30, active: true}, {x: 0, h: 0, active: false}, {x: 0, h: 0, active: false}];
+let dinoNeedRedraw = false;
+const GROUND_Y = 200, DINO_X = 30, DINO_W = 20, DINO_H = 24, OBS_W = 15;
+
+function launchDino() {
+    currentApp = 'dino';
+    dinoY = GROUND_Y - DINO_H; dinoVelY = 0; dinoOnGround = true; dinoJumping = false; dinoSpeed = 3.0;
+    dinoScore = 0; dinoGameOver = false; dinoLastScore = millis();
+    dinoObs = [{x: 280, h: 30, active: true}, {x: 0, h: 0, active: false}, {x: 0, h: 0, active: false}];
+    dinoNeedRedraw = true;
+    tft.fillScreen(0x841F);
+    drawDinoGround(); drawDinoHUD();
+}
+
+function drawDinoGround() {
+    tft.fillRect(0, GROUND_Y, SCREEN_W, 4, 0x8C51);
+    tft.fillRect(0, GROUND_Y + 4, SCREEN_W, 2, 0x5A0B);
+}
+
+function drawDinoHUD() {
+    tft.fillRect(0, 0, SCREEN_W, 20, 0x0841);
+    tft.drawFastHLine(0, 20 - 1, SCREEN_W, 0x07FF);
+    tft.setTextColor(0x07E0); tft.setTextFont(4); tft.setCursor(5, 8); tft.print("DINO");
+    tft.setTextColor(0xFFFF); tft.setTextFont(2); tft.setCursor(90, 5); tft.print("SCORE: " + dinoScore);
+    tft.setCursor(90, 22); tft.print("BEST:  " + dinoHighScore);
+    let spd = Math.floor(((dinoSpeed - 3.0) / 7.0) * 50);
+    tft.fillRect(185, 10, 50, 8, 0x2945); tft.fillRect(185, 10, spd, 8, 0xFFE0);
+}
+
+function drawDinoSprite(leg) {
+    let x = DINO_X, y = Math.floor(dinoY);
+    tft.fillRoundRect(x, y, DINO_W, DINO_H - 10, 4, 0x0400); 
+    tft.fillRoundRect(x + 4, y - 12, DINO_W - 4, 14, 3, 0x0400); 
+    tft.fillCircle(x + DINO_W - 4, y - 7, 2, 0xFFFF);
+    tft.fillCircle(x + DINO_W - 3, y - 7, 1, 0x0000);
+    if (!dinoJumping) {
+        if (leg) {
+            tft.fillRect(x + 4, y + DINO_H - 10, 6, 10, 0x0400);
+            tft.fillRect(x + 14, y + DINO_H - 16, 6, 4, 0x0400);
+        } else {
+            tft.fillRect(x + 4, y + DINO_H - 16, 6, 4, 0x0400);
+            tft.fillRect(x + 14, y + DINO_H - 10, 6, 10, 0x0400);
+        }
+    } else {
+        tft.fillRect(x + 4, y + DINO_H - 10, 6, 10, 0x0400);
+        tft.fillRect(x + 14, y + DINO_H - 10, 6, 10, 0x0400);
+    }
+}
+
+function drawDinoObstacle(obs) {
+    let x = Math.floor(obs.x), y = GROUND_Y - obs.h;
+    tft.fillRoundRect(x, y, OBS_W, obs.h, 2, 0x05E0);
+    tft.fillRect(x - 6, y + 8, 8, 6, 0x05E0);
+    tft.fillRect(x + OBS_W - 2, y + 8, 8, 6, 0x05E0);
+}
+
+function drawDinoGameOver() {
+    tft.fillRoundRect(20, 110, 200, 100, 10, 0x0841);
+    tft.drawRoundRect(20, 110, 200, 100, 10, 0xF800);
+    tft.setTextColor(0xF800); tft.setTextFont(4); tft.setCursor(45, 120); tft.print("GAME OVER");
+    tft.setTextColor(0xFFFF); tft.setTextFont(2); tft.setCursor(60, 155); tft.print("Score: " + dinoScore);
+    tft.setCursor(60, 172); tft.print("Best:  " + dinoHighScore);
+    tft.setTextColor(0x07FF); tft.setCursor(35, 193); tft.print("[A] Restart  [B] Menu");
+}
+
+function runDinoFrame() {
+    let btnA = hw.buttons.A, btnB = hw.buttons.B, btnStart = hw.buttons.START, btnSelect = hw.buttons.SELECT;
+    let up = hw.buttons.UP || hw.joystick.y < 1748;
+    if (dinoGameOver) {
+        if ((btnA && !prevBtnA) || (btnStart && !prevBtnStart)) launchDino();
+        if ((btnB && !prevBtnB) || (btnSelect && !prevBtnSelect)) launchMenu();
+        return;
+    }
+    if ((btnB && !prevBtnB) || (btnSelect && !prevBtnSelect)) { launchMenu(); return; }
+    
+    let jumpBtn = btnA || up;
+    if (jumpBtn && dinoOnGround) {
+        dinoVelY = -8.0; 
+        dinoOnGround = false; dinoJumping = true; tone(660, 80);
+    }
+    
+    dinoVelY += 0.6; 
+    dinoY += dinoVelY;
+    if (dinoY >= GROUND_Y - DINO_H) {
+        dinoY = GROUND_Y - DINO_H; dinoVelY = 0; dinoOnGround = true; dinoJumping = false;
+    }
+    
+    for (let o of dinoObs) {
+        if (!o.active) continue;
+        o.x -= dinoSpeed;
+        if (o.x < -OBS_W) o.active = false;
+        
+        let ox = Math.floor(o.x), oy = GROUND_Y - o.h, dy = Math.floor(dinoY);
+        if (!(DINO_X + DINO_W - 4 < ox + 2 || DINO_X + 4 > ox + OBS_W - 2 || dy + DINO_H < oy + 4 || dy > oy + o.h)) {
+            dinoGameOver = true; if (dinoScore > dinoHighScore) dinoHighScore = dinoScore; tone(150, 400); drawDinoGameOver(); return;
+        }
+    }
+    
+    let now = millis();
+    if (now > dinoNextSpawn) {
+        for (let o of dinoObs) {
+            if (!o.active) {
+                o.x = SCREEN_W + 10; o.h = Math.floor(Math.random() * (40 - 15 + 1)) + 15; o.active = true; break;
+            }
+        }
+        dinoNextSpawn = now + Math.floor(Math.random() * (3000 - 1500 + 1)) + 1500;
+    }
+    
+    if (now - dinoLastScore > 100) {
+        dinoScore++; dinoLastScore = now;
+        if (dinoScore % 10 === 0) dinoSpeed = Math.min(3.0 + dinoScore * 0.02, 10.0);
+    }
+    
+    if (dinoNeedRedraw) {
+        tft.fillScreen(0x841F);
+        dinoNeedRedraw = false;
+    } else {
+        tft.fillRect(0, 20, SCREEN_W, SCREEN_H - 20 - 20, 0x841F);
+    }
+    drawDinoGround();
+    if (now - dinoLastAnim > 150 && dinoOnGround) { dinoLegToggle = !dinoLegToggle; dinoLastAnim = now; }
+    drawDinoSprite(dinoLegToggle);
+    for (let o of dinoObs) { if (o.active) drawDinoObstacle(o); }
+    drawDinoHUD();
+}
+
+function launchFlappy() { currentApp = 'flappy'; tft.fillScreen(0x0410); tft.setTextColor(0xFFFF); tft.setTextFont(2); tft.setCursor(20, 150); tft.print("Flappy Bird Placeholder..."); drawStatusBar(); }
+function launchSpace() { currentApp = 'space'; tft.fillScreen(0x0000); tft.setTextColor(0xFFFF); tft.setTextFont(2); tft.setCursor(20, 150); tft.print("Space Shooter Placeholder..."); drawStatusBar(); }
+function launchSettings() { currentApp = 'settings'; tft.fillScreen(0x0000); tft.setTextColor(0xFFFF); tft.setTextFont(2); tft.setCursor(20, 150); tft.print("Settings UI Placeholder..."); drawStatusBar(); }
 
 // ── CLOUD GAMING (JSNES) ────────────────────────────────────────
 let nes = null;
@@ -822,8 +1073,8 @@ function loop() {
             if (currentApp==='menu') drawMenu(); else if (currentApp==='wifi') drawWiFi(); 
             else if (currentApp==='cloudmusic') drawCloudMusicUI(); else if (currentApp==='devconfig') drawDevConfig();
             else if (currentApp==='lockscreen') drawLockscreen();
-            else if (currentApp==='snake') launchSnake();
-            else if (currentApp==='dino') launchDino();
+            else if (currentApp==='snake') { snakeNeedRedraw = true; runSnakeFrame(); }
+            else if (currentApp==='dino') { dinoNeedRedraw = true; runDinoFrame(); }
             else if (currentApp==='space') launchSpace();
             else if (currentApp==='flappy') launchFlappy();
             else if (currentApp==='settings') launchSettings();
@@ -926,8 +1177,14 @@ function loop() {
     else if (currentApp === 'nes') {
         runContraFrame();
     }
-    else if (['snake','dino','space','settings'].includes(currentApp)) {
-        if (jPressed(btnB, prevBtnB)) launchMenu();
+    else if (currentApp === 'snake') {
+        runSnakeFrame();
+    }
+    else if (currentApp === 'dino') {
+        runDinoFrame();
+    }
+    else if (['space','flappy','settings'].includes(currentApp)) {
+        if (jPressed(btnB, prevBtnB) || jPressed(btnSelect, prevBtnSelect)) launchMenu();
     }
 
     prevBtnA=btnA; prevBtnB=btnB; prevBtnStart=btnStart; prevBtnUp=btnUp; prevBtnDown=btnDown; prevBtnLeft=btnLeft; prevBtnRight=btnRight; prevBtnHome=btnHome; prevBtnPower=btnPower;
