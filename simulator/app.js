@@ -1,4 +1,4 @@
-﻿// ============================================================
+// ============================================================
 // ESP32 Console Simulator - Full App Logic
 // Tính năng: Lockscreen, Control Center, WiFi Setup, Cloud Music, 4 Games, Dev Config
 // ============================================================
@@ -511,6 +511,7 @@ cloudAudioObj.crossOrigin = "anonymous";
 let cloudMusicIndex = 0;
 let cloudMusicPlaying = false;
 let cloudTracks = [
+    { name: "Dat G (Gia Lap)", url: "https://raw.githubusercontent.com/namthanh150525-dev/esp32-server/main/simulator/music/song.mp3" },
     { name: "Test Song (MP3)", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" }, 
     { name: "Lofi Rain", url: "https://actions.google.com/sounds/v1/water/rain_on_roof.ogg" },
     { name: "8-Bit Bugle", url: "https://actions.google.com/sounds/v1/alarms/bugle_tune.ogg" }
