@@ -675,7 +675,7 @@ function launchNES(romFile, sizeStr) {
                     initNESAudio();
                     let str = ''; let bytes = new Uint8Array(buffer);
                     for(let i=0; i<bytes.length; i++) str += String.fromCharCode(bytes[i]);
-                    nes.loadROM(str); nesDownloading = false; nesPlaying = true;
+                    nes.loadROM(str); nesDownloading = false; nesPlaying = true; tft.fillScreen(0x0000);
                 } catch(e) {
                     tft.fillScreen(0x0000); tft.setCursor(10, 100); tft.setTextColor(0xF800); tft.print("ROM DECODE ERROR");
                     tft.setCursor(10, 120); tft.print(e.message); drawStatusBar();
@@ -822,6 +822,16 @@ function loop() {
             if (currentApp==='menu') drawMenu(); else if (currentApp==='wifi') drawWiFi(); 
             else if (currentApp==='cloudmusic') drawCloudMusicUI(); else if (currentApp==='devconfig') drawDevConfig();
             else if (currentApp==='lockscreen') drawLockscreen();
+            else if (currentApp==='snake') launchSnake();
+            else if (currentApp==='dino') launchDino();
+            else if (currentApp==='space') launchSpace();
+            else if (currentApp==='flappy') launchFlappy();
+            else if (currentApp==='settings') launchSettings();
+            else if (currentApp==='nes') {
+                tft.fillScreen(0x0000); 
+                const mainCtx = document.getElementById('tft-screen').getContext('2d');
+                mainCtx.drawImage(nesCanvas, 32, 0);
+            }
             
             if (ccY > -140) drawControlCenter(ccY);
         }
