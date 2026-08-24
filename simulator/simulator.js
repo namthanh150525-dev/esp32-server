@@ -1,4 +1,4 @@
-// ESP32 Simulator Core
+﻿// ESP32 Simulator Core
 
 class VirtualHardware {
     constructor() {
@@ -151,6 +151,9 @@ class VirtualHardware {
                 resetJoystick();
             }
         });
+
+
+    }
 
     updateUIBtnState(btnName, isPressed) {
         const el = document.querySelector(`[data-btn="${btnName}"]`);
