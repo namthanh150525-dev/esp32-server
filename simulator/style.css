@@ -1,0 +1,299 @@
+:root {
+    --bg-color: #0f172a;
+    --console-body: linear-gradient(145deg, #1e293b, #0f172a);
+    --console-border: #334155;
+    --screen-bezel: #000000;
+    --btn-color: #334155;
+    --btn-active: #475569;
+    --btn-a: #ef4444; /* Red */
+    --btn-b: #eab308; /* Yellow */
+    --accent: #38bdf8;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 2rem;
+    overflow-x: hidden;
+}
+
+.simulator-container {
+    display: flex;
+    gap: 3rem;
+    max-width: 1200px;
+    width: 100%;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* --- Console Device --- */
+.console-device {
+    display: flex;
+    background: var(--console-body);
+    border: 2px solid var(--console-border);
+    border-radius: 40px;
+    padding: 2rem;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.7),
+        inset 0 2px 10px rgba(255, 255, 255, 0.1),
+        inset 0 -5px 20px rgba(0, 0, 0, 0.5);
+    position: relative;
+    gap: 1.5rem;
+    align-items: center;
+    z-index: 10;
+}
+
+/* --- Controls Layout --- */
+.controls-left, .controls-right {
+    display: flex;
+    flex-direction: column;
+    gap: 3rem;
+    width: 150px;
+    align-items: center;
+    justify-content: center;
+}
+
+/* --- Screen --- */
+.screen-container {
+    position: relative;
+    background: var(--screen-bezel);
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 
+        inset 0 5px 15px rgba(0,0,0,0.8),
+        0 0 0 2px #1e293b;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#tft-screen {
+    background-color: #0820; /* Default boot color */
+    border-radius: 4px;
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.1);
+    image-rendering: pixelated;
+    display: block;
+}
+
+.screen-glass {
+    position: absolute;
+    top: 20px; left: 20px; right: 20px; bottom: 20px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 40%);
+    pointer-events: none;
+    border-radius: 4px;
+}
+
+/* --- Analog Stick --- */
+.analog-stick-container {
+    width: 80px;
+    height: 80px;
+    background: #1e293b;
+    border-radius: 50%;
+    position: relative;
+    box-shadow: inset 0 5px 15px rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: grab;
+}
+
+.analog-thumb {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(145deg, #475569, #334155);
+    border-radius: 50%;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.4), inset 0 2px 5px rgba(255,255,255,0.1);
+    position: absolute;
+    transition: transform 0.1s; /* Smooth return */
+}
+.analog-stick-container:active .analog-thumb {
+    cursor: grabbing;
+    transition: none; /* No transition while dragging */
+}
+
+/* --- D-Pad --- */
+.dpad {
+    position: relative;
+    width: 100px;
+    height: 100px;
+}
+
+.dpad-btn {
+    position: absolute;
+    background: linear-gradient(145deg, #334155, #1e293b);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,255,255,0.1);
+    cursor: pointer;
+}
+.dpad-btn:active, .dpad-btn.active {
+    background: #1e293b;
+    box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+}
+
+.dpad-btn.up { top: 0; left: 33px; width: 34px; height: 35px; border-radius: 5px 5px 0 0; }
+.dpad-btn.down { bottom: 0; left: 33px; width: 34px; height: 35px; border-radius: 0 0 5px 5px; }
+.dpad-btn.left { top: 33px; left: 0; width: 35px; height: 34px; border-radius: 5px 0 0 5px; }
+.dpad-btn.right { top: 33px; right: 0; width: 35px; height: 34px; border-radius: 0 5px 5px 0; }
+
+.dpad-center {
+    position: absolute;
+    top: 33px; left: 33px;
+    width: 34px; height: 34px;
+    background: #253347;
+    z-index: 1;
+}
+
+/* --- Action Buttons --- */
+.action-buttons {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    transform: rotate(-15deg);
+}
+
+.action-btn {
+    position: absolute;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    background: linear-gradient(145deg, #475569, #334155);
+    box-shadow: 0 5px 10px rgba(0,0,0,0.4), inset 0 2px 5px rgba(255,255,255,0.2);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    color: rgba(255,255,255,0.5);
+    font-size: 14px;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.05s, box-shadow 0.05s;
+}
+
+.action-btn:active, .action-btn.active {
+    transform: translateY(3px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.4), inset 0 3px 6px rgba(0,0,0,0.6);
+}
+
+.btn-a { right: 0; top: 40px; color: var(--btn-a); }
+.btn-b { bottom: 0; left: 40px; color: var(--btn-b); }
+.btn-x { top: 0; left: 40px; }
+.btn-y { left: 0; top: 40px; }
+
+
+/* --- System Buttons --- */
+.system-buttons {
+    display: flex;
+    gap: 15px;
+    transform: rotate(-15deg);
+    margin-top: 20px;
+}
+
+.sys-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+}
+
+.sys-btn-pill {
+    width: 30px;
+    height: 10px;
+    background: #334155;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.4), inset 0 1px 2px rgba(255,255,255,0.1);
+    transition: transform 0.05s, box-shadow 0.05s;
+}
+
+.sys-btn:active .sys-btn-pill, .sys-btn.active .sys-btn-pill {
+    transform: translateY(2px);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+}
+
+.sys-btn span {
+    font-size: 10px;
+    color: var(--text-muted);
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+/* --- Side Panel --- */
+.side-panel {
+    background: rgba(30, 41, 59, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 2rem;
+    width: 350px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.side-panel h2 {
+    font-size: 1.5rem;
+    color: var(--accent);
+}
+
+.side-panel p {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.status-panel {
+    background: #0f172a;
+    border-radius: 10px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-family: monospace;
+    font-size: 0.9rem;
+}
+
+.status-item {
+    display: flex;
+    justify-content: space-between;
+}
+.status-item span:last-child {
+    color: var(--accent);
+}
+
+.code-instructions {
+    background: #0f172a;
+    border-radius: 10px;
+    padding: 1rem;
+}
+.code-instructions h3 {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-main);
+}
+.code-instructions ul {
+    list-style: none;
+    font-family: monospace;
+    font-size: 0.8rem;
+    color: var(--accent);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.code-instructions li {
+    background: #1e293b;
+    padding: 4px 8px;
+    border-radius: 4px;
+}
