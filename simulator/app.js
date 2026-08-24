@@ -706,7 +706,7 @@ function runContraFrame() {
     
     nes.frame(); nesCtx.putImageData(nesImageData, 0, 0);
     const mainCtx = document.getElementById('tft-screen').getContext('2d');
-    mainCtx.drawImage(nesCanvas, 32, 0); 
+    mainCtx.drawImage(nesCanvas, 0, 0, 320, 240); 
     if (hw.buttons.HOME) { nesPlaying = false; launchMenu(); } // Thoát
 }
 
@@ -830,7 +830,7 @@ function loop() {
             else if (currentApp==='nes') {
                 tft.fillScreen(0x0000); 
                 const mainCtx = document.getElementById('tft-screen').getContext('2d');
-                mainCtx.drawImage(nesCanvas, 32, 0);
+                mainCtx.drawImage(nesCanvas, 0, 0, 320, 240);
             }
             
             if (ccY > -140) drawControlCenter(ccY);
