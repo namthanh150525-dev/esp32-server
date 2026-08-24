@@ -511,7 +511,7 @@ cloudAudioObj.crossOrigin = "anonymous";
 let cloudMusicIndex = 0;
 let cloudMusicPlaying = false;
 let cloudTracks = [
-    { name: "Dat G (Gia Lap)", url: "https://raw.githubusercontent.com/namthanh150525-dev/esp32-server/main/simulator/music/song.mp3" },
+    { name: "Dat G (Gia Lap)", url: "./music/DatG.mp3" },
     { name: "Test Song (MP3)", url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" }, 
     { name: "Lofi Rain", url: "https://actions.google.com/sounds/v1/water/rain_on_roof.ogg" },
     { name: "8-Bit Bugle", url: "https://actions.google.com/sounds/v1/alarms/bugle_tune.ogg" }
@@ -520,19 +520,19 @@ let cloudTracks = [
 function launchCloudMusic() { currentApp = 'cloudmusic'; drawCloudMusicUI(); }
 function drawCloudMusicUI() {
     tft.fillScreen(0x1082); tft.fillRect(0, 16, SCREEN_W, 30, 0x0820);
-    tft.setTextColor(0x07FF); tft.setTextFont(4); tft.setCursor(5, 20); tft.print("CLOUD MUSIC");
+    tft.setTextColor(0x07FF); tft.setTextFont(4); tft.setCursor(5, 20); tft.print("CLOUD MP3 PLAYER");
     tft.drawFastHLine(0, 45, SCREEN_W, 0x07FF);
     
     const track = cloudTracks[cloudMusicIndex];
-    tft.fillRect(40, 60, 160, 120, 0x2945); tft.drawRect(40, 60, 160, 120, 0x07FF);
-    tft.fillCircle(120, 120, 40, 0x1082); tft.fillCircle(120, 120, 10, 0x07E0); // Vinyl mock
+    tft.fillRect(40, 50, 160, 120, 0x2945); tft.drawRect(40, 50, 160, 120, 0x07FF);
+    tft.fillCircle(120, 110, 40, 0x1082); tft.fillCircle(120, 110, 10, 0x07E0); // Vinyl mock
     
-    tft.fillRect(0, 190, SCREEN_W, 130, 0x1082);
-    tft.setTextColor(0xFFFF); tft.setTextFont(2); tft.setCursor(20, 200); tft.print(track.name);
-    tft.setTextColor(0x7BEF); tft.setTextFont(2); tft.setCursor(20, 225); tft.print("Streaming via Cloudflare");
+    tft.fillRect(0, 180, SCREEN_W, 60, 0x1082);
+    tft.setTextColor(0xFFFF); tft.setTextFont(2); tft.setCursor(20, 185); tft.print(track.name);
+    tft.setTextColor(0x7BEF); tft.setTextFont(1); tft.setCursor(20, 205); tft.print("Streaming MP3");
     
-    tft.setTextColor(0x07E0); tft.setTextFont(2); tft.setCursor(20, 260); tft.print("[<-] Prev   [->] Next");
-    tft.setTextColor(cloudMusicPlaying ? 0xF800 : 0x07FF); tft.setCursor(20, 280); tft.print("[A] " + (cloudMusicPlaying ? "Pause" : "Play") + "   [B] Exit");
+    tft.setTextColor(0x07E0); tft.setTextFont(1); tft.setCursor(20, 225); tft.print("[<-] Prev  [->] Next");
+    tft.setTextColor(cloudMusicPlaying ? 0xF800 : 0x07FF); tft.setCursor(150, 225); tft.print("[A] " + (cloudMusicPlaying ? "Pause" : "Play") + "  [B] Exit");
     
     drawStatusBar();
 }
