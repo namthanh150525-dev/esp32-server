@@ -477,17 +477,17 @@ function drawWiFi() {
             tft.fillCircle(SCREEN_W - 20, y + 15, 5, 0x07E0);
         }
     } else if (wifiState === 'keyboard') {
-        tft.print("ENTER PASSWORD"); tft.setTextColor(0x7BEF); tft.setCursor(10, 55); tft.print("SSID: " + wifiSelected);
-        tft.fillRect(10, 75, 220, 30, 0x18E3); tft.drawRect(10, 75, 220, 30, 0x07FF);
-        tft.setTextColor(0xFFFF); tft.setTextFont(4); tft.setCursor(15, 80);
+        tft.print("ENTER PASSWORD"); tft.setTextColor(0x7BEF); tft.setCursor(10, 45); tft.print("SSID: " + wifiSelected);
+        tft.fillRect(10, 60, 220, 30, 0x18E3); tft.drawRect(10, 60, 220, 30, 0x07FF);
+        tft.setTextColor(0xFFFF); tft.setTextFont(4); tft.setCursor(15, 65);
         let masked = ""; for(let i=0; i<wifiPwd.length; i++) masked+="*";
         tft.print(masked + "_");
         
-        const startY = 125; tft.setTextFont(2);
+        const startY = 100; tft.setTextFont(2);
         for(let r=0; r<5; r++) {
             for(let c=0; c<10; c++) {
                 if (kbLayout[r][c] === '') continue;
-                let w = 22, h = 26, x = 10 + c*22;
+                let w = 22, h = 24, x = 10 + c*22; // Reduced height to 24
                 if (r===4) {
                     if (c===0) w = 66; // DEL
                     else if (c===3) { x = 76; w = 66; } // SPACE
