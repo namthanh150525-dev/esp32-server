@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32 Portable Console Simulator</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="simulator-container">
+        <!-- Audio Unlock Overlay -->
+        <div id="audio-overlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#07FF;font-family:'Inter',sans-serif;cursor:pointer;">
+            <h1 style="font-size:3rem;margin-bottom:10px;">BẬT ÂM THANH</h1>
+            <p style="font-size:1.2rem;color:#FFF;">Click vào bất kỳ đâu trên màn hình để cấp quyền phát âm thanh</p>
+        </div>
+
+        <!-- Main Console Device -->
+        <div class="console-device">
+            <!-- New Top Buttons -->
+            <div class="bumper-btn btn-l" data-btn="L">L</div>
+            <div class="bumper-btn btn-r" data-btn="R">R</div>
+            <div class="power-btn" data-btn="POWER">POWER</div>
+
+            <!-- Left Controls -->
+            <div class="controls-left">
+                <!-- Analog Stick -->
+                <div class="analog-stick-container" id="analog-stick">
+                    <div class="analog-thumb"></div>
+                </div>
+                
+                <!-- D-Pad -->
+                <div class="dpad">
+                    <div class="dpad-btn up" data-btn="UP"></div>
+                    <div class="dpad-btn right" data-btn="RIGHT"></div>
+                    <div class="dpad-btn down" data-btn="DOWN"></div>
+                    <div class="dpad-btn left" data-btn="LEFT"></div>
+                    <div class="dpad-center"></div>
+                </div>
+            </div>
+
+            <!-- Center Screen -->
+            <div class="screen-container">
+                <canvas id="tft-screen" width="320" height="240"></canvas>
+                <div class="screen-glass"></div>
+            </div>
+
+            <!-- Right Controls -->
+            <div class="controls-right">
+                <div class="action-buttons">
+                    <div class="action-btn btn-y" data-btn="Y">Y</div>
+                    <div class="action-btn btn-x" data-btn="X">X</div>
+                    <div class="action-btn btn-b" data-btn="B">B</div>
+                    <div class="action-btn btn-a" data-btn="A">A</div>
+                </div>
+                
+                <div class="system-buttons">
+                    <div class="sys-btn" data-btn="SELECT">
+                        <div class="sys-btn-pill"></div>
+                        <span>SELECT</span>
+                    </div>
+                    <div class="sys-btn" data-btn="START">
+                        <div class="sys-btn-pill"></div>
+                        <span>START</span>
+                    </div>
+                </div>
+                
+                <!-- Right Analog Stick -->
+                <div class="analog-stick-container" id="analog-stick-right" style="margin-top: 10px;">
+                    <div class="analog-thumb"></div>
+                </div>
+            </div>
+
+            <!-- Home Button -->
+            <div class="home-btn" data-btn="HOME">HOME</div>
+        </div>
+        
+        <!-- Editor / Logs Panel -->
+        <div class="side-panel">
+            <h2>Simulator Control</h2>
+            <p>Write your UI logic in <code>app.js</code>. The simulator provides a <code>tft</code> object with Adafruit_GFX-like methods.</p>
+            
+            <div class="status-panel">
+                <div class="status-item">
+                    <span>Joy L (X,Y):</span> <span id="joy-x-val">2048, 2048</span>
+                </div>
+                <div class="status-item">
+                    <span>Joy R (X,Y):</span> <span id="joy-rx-val">2048, 2048</span>
+                </div>
+                <div class="status-item">
+                    <span>Active Buttons:</span> <span id="active-btns-val">None</span>
+                </div>
+            </div>
+
+            <div class="code-instructions">
+                <h3>Available Methods</h3>
+                <ul>
+                    <li><code>tft.fillScreen(color)</code></li>
+                    <li><code>tft.drawRect(x,y,w,h,color)</code></li>
+                    <li><code>tft.fillRect(x,y,w,h,color)</code></li>
+                    <li><code>tft.drawCircle(x,y,r,color)</code></li>
+                    <li><code>tft.fillCircle(x,y,r,color)</code></li>
+                    <li><code>tft.drawLine(x0,y0,x1,y1,color)</code></li>
+                    <li><code>tft.setTextColor(color, bg)</code></li>
+                    <li><code>tft.setTextSize(size)</code></li>
+                    <li><code>tft.setCursor(x, y)</code></li>
+                    <li><code>tft.print(text)</code></li>
+                </ul>
+                <p>Colors use 16-bit RGB565 format (e.g., <code>0xF800</code> for Red), or standard CSS strings.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/jsnes/dist/jsnes.min.js"></script>
+    <script src="simulator.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
