@@ -1,4 +1,4 @@
-﻿// ============================================================
+// ============================================================
 // ESP32 Console Simulator - Full App Logic
 // Tính năng: Lockscreen, Control Center, WiFi Setup, Cloud Music, 4 Games, Dev Config
 // ============================================================
@@ -829,10 +829,10 @@ function loop() {
     else if (currentApp === 'menu') {
         // Cập nhật phím di chuyển cho menu 4 cột
         const cols = 4;
-        if (hw.buttons.LEFT && !prevBtnLeft) { menuCursor = (menuCursor - 1 + MENU_ITEMS.length) % MENU_ITEMS.length; }
-        if (hw.buttons.RIGHT && !prevBtnRight) { menuCursor = (menuCursor + 1) % MENU_ITEMS.length; }
-        if (hw.buttons.UP && !prevBtnUp) { menuCursor = (menuCursor - cols + MENU_ITEMS.length) % MENU_ITEMS.length; }
-        if (hw.buttons.DOWN && !prevBtnDown) { menuCursor = (menuCursor + cols) % MENU_ITEMS.length; }
+        if (jPressed(btnLeft, prevBtnLeft)) { menuCursor = (menuCursor - 1 + MENU_ITEMS.length) % MENU_ITEMS.length; drawMenu(); tone(440,20); }
+        if (jPressed(btnRight, prevBtnRight)) { menuCursor = (menuCursor + 1) % MENU_ITEMS.length; drawMenu(); tone(440,20); }
+        if (jPressed(btnUp, prevBtnUp)) { menuCursor = (menuCursor - cols + MENU_ITEMS.length) % MENU_ITEMS.length; drawMenu(); tone(440,20); }
+        if (jPressed(btnDown, prevBtnDown)) { menuCursor = (menuCursor + cols) % MENU_ITEMS.length; drawMenu(); tone(440,20); }
         if (jPressed(btnA, prevBtnA) || jPressed(btnStart, prevBtnStart)) {
             tone(880, 80);
             const item = MENU_ITEMS[menuCursor];
