@@ -49,7 +49,7 @@ function showSplash() {
         if (progress >= 180) {
             clearInterval(bar);
             tone(523, 100); setTimeout(() => tone(659, 100), 130); setTimeout(() => tone(784, 100), 260); setTimeout(() => tone(1047, 200), 390);
-            setTimeout(() => { currentApp = 'lockscreen'; }, 800);
+            setTimeout(() => { currentApp = 'lockscreen'; drawLockscreen(); }, 800);
         }
     }, 20);
 }
