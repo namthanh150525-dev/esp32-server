@@ -5,10 +5,15 @@ class VirtualHardware {
         this.buttons = {
             A: false, B: false, X: false, Y: false,
             UP: false, DOWN: false, LEFT: false, RIGHT: false,
-            START: false, SELECT: false
+            START: false, SELECT: false,
+            L: false, R: false, HOME: false, POWER: false
         };
         this.joystick = {
             x: 2048, // 0 - 4095
+            y: 2048
+        };
+        this.joystickRight = {
+            x: 2048,
             y: 2048
         };
         
@@ -21,7 +26,8 @@ class VirtualHardware {
             'w': 'UP', 's': 'DOWN', 'a': 'LEFT', 'd': 'RIGHT',
             'ArrowUp': 'UP', 'ArrowDown': 'DOWN', 'ArrowLeft': 'LEFT', 'ArrowRight': 'RIGHT',
             'j': 'A', 'k': 'B', 'u': 'X', 'i': 'Y',
-            'Enter': 'START', 'Shift': 'SELECT', 'c': 'SELECT'
+            'Enter': 'START', 'Shift': 'SELECT', 'c': 'SELECT',
+            'q': 'L', 'e': 'R', 'h': 'HOME', 'p': 'POWER'
         };
 
         window.addEventListener('keydown', (e) => {
@@ -62,8 +68,16 @@ class VirtualHardware {
             el.addEventListener('touchend', release);
         });
 
-        // Analog Joystick dragging logic
-        const joyContainer = document.getElementById('analog-stick');
+        // Analog Joystick dragging logic (Left)
+        this.initJoystick('analog-stick', this.joystick);
+        
+        // Analog Joystick dragging logic (Right)
+        this.initJoystick('analog-stick-right', this.joystickRight);
+    }
+
+    initJoystick(containerId, joyState) {
+        const joyContainer = document.getElementById(containerId);
+        if (!joyContainer) return;
         const joyThumb = joyContainer.querySelector('.analog-thumb');
         
         let isDragging = false;
@@ -90,15 +104,14 @@ class VirtualHardware {
             
             joyThumb.style.transform = `translate(${dx}px, ${dy}px)`;
             
-            // Map -maxRadius...maxRadius to 0...4095
-            this.joystick.x = Math.floor(2048 + (dx / maxRadius) * 2047);
-            this.joystick.y = Math.floor(2048 + (dy / maxRadius) * 2047);
+            joyState.x = Math.floor(2048 + (dx / maxRadius) * 2047);
+            joyState.y = Math.floor(2048 + (dy / maxRadius) * 2047);
         };
         
         const resetJoystick = () => {
             joyThumb.style.transform = `translate(0px, 0px)`;
-            this.joystick.x = 2048;
-            this.joystick.y = 2048;
+            joyState.x = 2048;
+            joyState.y = 2048;
             joyThumb.style.transition = 'transform 0.1s';
         };
 
@@ -138,7 +151,6 @@ class VirtualHardware {
                 resetJoystick();
             }
         });
-    }
 
     updateUIBtnState(btnName, isPressed) {
         const el = document.querySelector(`[data-btn="${btnName}"]`);
@@ -149,8 +161,10 @@ class VirtualHardware {
     }
 
     updateStatusPanel() {
-        document.getElementById('joy-x-val').innerText = this.joystick.x;
-        document.getElementById('joy-y-val').innerText = this.joystick.y;
+        document.getElementById('joy-x-val').innerText = `${this.joystick.x}, ${this.joystick.y}`;
+        const joyRxEl = document.getElementById('joy-rx-val');
+        if (joyRxEl) joyRxEl.innerText = `${this.joystickRight.x}, ${this.joystickRight.y}`;
+
         
         const active = Object.keys(this.buttons).filter(k => this.buttons[k]);
         document.getElementById('active-btns-val').innerText = active.length > 0 ? active.join(', ') : 'None';

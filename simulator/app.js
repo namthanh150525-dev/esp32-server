@@ -17,7 +17,7 @@ let sysBrightness = 80;
 let sysVolume = 50;
 let isWifiConnected = false;
 
-let prevBtnA = false, prevBtnStart = false, prevBtnB = false;
+let prevBtnA = false, prevBtnStart = false, prevBtnB = false, prevBtnUp = false, prevBtnDown = false, prevBtnLeft = false, prevBtnRight = false, prevBtnHome = false, prevBtnPower = false;
 let prevBtnUp = false, prevBtnDown = false, prevBtnLeft = false, prevBtnRight = false, prevBtnSelect = false;
 
 // ── Audio (Mô phỏng tone ESP32) ───────────────────────────────
@@ -698,7 +698,7 @@ function runContraFrame() {
     nes.frame(); nesCtx.putImageData(nesImageData, 0, 0);
     const mainCtx = document.getElementById('tft-screen').getContext('2d');
     mainCtx.drawImage(nesCanvas, 32, 0); 
-    if (hw.buttons.X) { nesPlaying = false; launchMenu(); } // Thoát
+    if (hw.buttons.HOME) { nesPlaying = false; launchMenu(); } // Thoát
 }
 
 function millis() { return performance.now(); }
@@ -727,9 +727,27 @@ let abHoldStart = 0;
 function loop() {
     if (currentApp === null) return;
     const btnA = hw.buttons.A, btnB = hw.buttons.B, btnStart = hw.buttons.START, btnX = hw.buttons.X, btnY = hw.buttons.Y;
+    const btnHome = hw.buttons.HOME, btnPower = hw.buttons.POWER;
     const btnUp = hw.buttons.UP || hw.joystick.y < 1748, btnDown = hw.buttons.DOWN || hw.joystick.y > 2348;
     const btnLeft = hw.buttons.LEFT || hw.joystick.x < 1748, btnRight = hw.buttons.RIGHT || hw.joystick.x > 2348;
     const jPressed = (k, prev) => k && !prev;
+
+    // --- GLOBAL SYSTEM BUTTONS ---
+    if (jPressed(btnHome, prevBtnHome)) {
+        if (nesPlaying) nesPlaying = false;
+        if (currentApp !== 'lockscreen' && currentApp !== 'menu') {
+            launchMenu();
+            return; // Skip rest of frame
+        }
+    }
+    if (jPressed(btnPower, prevBtnPower)) {
+        if (currentApp !== 'lockscreen') {
+            if (nesPlaying) nesPlaying = false;
+            currentApp = 'lockscreen';
+            drawLockscreen();
+            return;
+        }
+    }
 
     // Hard Reset System by holding A + B for 5 seconds
     if (btnA && btnB) {
@@ -891,7 +909,7 @@ function loop() {
         if (jPressed(btnB, prevBtnB)) launchMenu();
     }
 
-    prevBtnA=btnA; prevBtnB=btnB; prevBtnStart=btnStart; prevBtnUp=btnUp; prevBtnDown=btnDown; prevBtnLeft=btnLeft; prevBtnRight=btnRight;
+    prevBtnA=btnA; prevBtnB=btnB; prevBtnStart=btnStart; prevBtnUp=btnUp; prevBtnDown=btnDown; prevBtnLeft=btnLeft; prevBtnRight=btnRight; prevBtnHome=btnHome; prevBtnPower=btnPower;
 }
 
 showSplash();

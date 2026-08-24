@@ -17,6 +17,11 @@
 
         <!-- Main Console Device -->
         <div class="console-device">
+            <!-- New Top Buttons -->
+            <div class="bumper-btn btn-l" data-btn="L">L</div>
+            <div class="bumper-btn btn-r" data-btn="R">R</div>
+            <div class="power-btn" data-btn="POWER">POWER</div>
+
             <!-- Left Controls -->
             <div class="controls-left">
                 <!-- Analog Stick -->
@@ -59,7 +64,15 @@
                         <span>START</span>
                     </div>
                 </div>
+                
+                <!-- Right Analog Stick -->
+                <div class="analog-stick-container" id="analog-stick-right" style="margin-top: 10px;">
+                    <div class="analog-thumb"></div>
+                </div>
             </div>
+
+            <!-- Home Button -->
+            <div class="home-btn" data-btn="HOME">HOME</div>
         </div>
         
         <!-- Editor / Logs Panel -->
@@ -69,10 +82,10 @@
             
             <div class="status-panel">
                 <div class="status-item">
-                    <span>Joystick X:</span> <span id="joy-x-val">2048</span>
+                    <span>Joy L (X,Y):</span> <span id="joy-x-val">2048, 2048</span>
                 </div>
                 <div class="status-item">
-                    <span>Joystick Y:</span> <span id="joy-y-val">2048</span>
+                    <span>Joy R (X,Y):</span> <span id="joy-rx-val">2048, 2048</span>
                 </div>
                 <div class="status-item">
                     <span>Active Buttons:</span> <span id="active-btns-val">None</span>
